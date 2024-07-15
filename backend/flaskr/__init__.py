@@ -179,7 +179,7 @@ def create_app(test_config=None):
             quiz_category = body.get('quiz_category', None)
             category_id = quiz_category['id']
 
-            if ((quiz_category is None) or (previous_questions is None)):
+            if quiz_category is None:
                 abort(400)
 
             if category_id == 0:
@@ -189,14 +189,13 @@ def create_app(test_config=None):
             if len(questions) == None:
                 question = None
             else:
-                choice = random.randrange(0, len(questions))
-                question = questions[choice]
+                question = random.choice(questions)
                 return jsonify({
                     'success': True,
                     'question': question.format(),
                     'total_questions': len(questions)
                     })
-        except Exception as e:
+        except:
             abort(422)
 
     # Error handlers for all expected errors
