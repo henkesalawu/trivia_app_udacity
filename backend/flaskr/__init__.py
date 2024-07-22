@@ -198,19 +198,18 @@ def create_app(test_config=None):
     def get_quizzes():
         try:
             body = request.get_json()
-            previous_questions = body.get('previous_questions', None)
-            quiz_category = body.get('quiz_category', None)
-            category_id = quiz_category['id']
+            previous_questions = body.get('previous_questions')
+            quiz_category = body.get('quiz_category')
 
-            if quiz_category is None:
+            if quiz_category is None and previous_questions is None:
                 abort(400)
 
-            if category_id == 0:
+            if quiz_category['id'] == 0:
                 questions = Question.query.filter(
                     Question.id.notin_((previous_questions))).all()
             else:
                 questions = Question.query.filter_by(
-                    category=category_id).filter(
+                    category=quiz_category['id']).filter(
                         Question.id.notin_(
                             (previous_questions))).all()
             if len(questions) is None:
