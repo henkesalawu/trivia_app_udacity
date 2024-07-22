@@ -8,6 +8,7 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page -1) * QUESTIONS_PER_PAGE
@@ -18,6 +19,7 @@ def paginate_questions(request, selection):
 
     return current_questions
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -27,7 +29,7 @@ def create_app(test_config=None):
     else:
         database_path = test_config.get('SQLALCHEMY_DATABASE_URI')
         setup_db(app, database_path=database_path)
-    CORS(app, resources={r"/api/*" : {"origins": '*'}})
+    CORS(app, resources={r"/api/*": {"origins": '*'}})
 
     @app.after_request
     def after_request(response):
@@ -39,36 +41,44 @@ def create_app(test_config=None):
     # Endpoint to handle GET requests for all available categories.
     @app.route("/categories", methods=['GET'])
     def get_categories():
-        categories = Category.query.order_by(Category.id).all()
-
-        if len(categories) == 0:
-            abort(400)
-
-        return jsonify({
-            "success": True,
-            "categories": {category.id: category.type for category in categories}
-        })
+        try:
+            categories = Category.query.order_by(Category.id).all()
+            
+            if len(categories) == 0:
+                abort(400)
+                
+            return jsonify({
+                "success": True,
+                "categories": {category.id: category.type for category in categories}
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
 
 
     # Endpoint to handle GET requests for questions, including pagination (every 10 questions).
 
     @app.route("/questions", methods=['GET'])
     def get_questions():
-        selection = Question.query.all()
-        categories = Category.query.all()
-        current_category = {category.id: category.type for category in categories}
+        try:
+            selection = Question.query.all()
+            categories = Category.query.all()
+            current_category = {category.id: category.type for category in categories}
 
-        questions_list = paginate_questions(request,selection)
-        if len(questions_list) == 0:
-            abort(404)
+            questions_list = paginate_questions(request, selection)
+            if len(questions_list) == 0:
+                abort(404)
 
-        return jsonify({
-            "success": True,
-            "questions": questions_list,
-            "total_questions": len(selection),
-            "categories": [category.type for category in categories],
-            "current_category":current_category,
-        }), 200
+            return jsonify({
+                "success": True,
+                "questions": questions_list,
+                "total_questions": len(selection),
+                "categories": [category.type for category in categories],
+                "current_category": current_category,
+            }), 200
+        except Exception as e:
+            print(e)
+            abort(422)
 
     # Endpoint to DELETE question using a question ID.
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
@@ -89,7 +99,8 @@ def create_app(test_config=None):
                 "deleted_question": deleted_question.format(),
                 "total_questions": len(selection),
             })
-        except Exception:
+        except Exception as e:
+            print(e)
             abort(422)
 
     # Endpoint to POST a new question,require the question, answer text, category, and difficulty score.
@@ -101,25 +112,28 @@ def create_app(test_config=None):
         new_category = body.get('category', None)
         new_difficulty = body.get('difficulty', None)
 
-        if (body, new_answer, new_category, new_difficulty, new_question) == None:
-            abort(422)
-
         try:
-            question = Question(
-                question=new_question,
-                answer=new_answer,
-                category=new_category,
-                difficulty=new_difficulty
-                )
-            question.insert()
+            if not new_question:
+                abort(422)
+            elif not new_answer:
+                abort(422)
+            else:
+                question = Question(
+                    question=new_question,
+                    answer=new_answer,
+                    category=new_category,
+                    difficulty=new_difficulty
+                    )
+                question.insert()
 
-            return jsonify({
-                "success": True,
-                "created": question.id,
-                "created_question": question.format(),
-                "total_questions": len(Question.query.all()),
-                })
-        except Exception:
+                return jsonify({
+                    "success": True,
+                    "created": question.id,
+                    "created_question": question.format(),
+                    "total_questions": len(Question.query.all()),
+                    })
+        except Exception as e:
+            print(e)
             abort(422)
 
     # Endpoint to get questions based on a search term.
@@ -128,7 +142,7 @@ def create_app(test_config=None):
         body = request.get_json()
         search_term = body.get('searchTerm', None)
 
-        if search_term == None:
+        if not search_term:
             abort(404)
         else:
             try:
@@ -139,7 +153,8 @@ def create_app(test_config=None):
                     "questions": formatted,
                     "total_questions": len(results)
                     })
-            except:
+            except Exception as e:
+                print(e)
                 abort(422)
 
     # Endpoint to get questions based on category.
@@ -163,9 +178,9 @@ def create_app(test_config=None):
                 "current_category":  category.format(),
                 })
                 
-        except:
+        except Exception as e:
+            print(e)
             abort(404)
-
 
 
     # Endpoint to get questions to play the quiz.
@@ -195,7 +210,8 @@ def create_app(test_config=None):
                     'question': question.format(),
                     'total_questions': len(questions)
                     })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     # Error handlers for all expected errors

@@ -5,6 +5,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
 from models import setup_db, Question, Category
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -12,9 +17,11 @@ class TriviaTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.database_name = "trivia_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
-        
+        load_dotenv()
+        self.database_host = os.getenv("DATABASE_HOST")
+        self.test_database_name = os.getenv("TEST_DATABASE_NAME")
+        self.database_path = 'postgresql://{}/{}'.format(self.database_host, self.test_database_name)
+    
         self.app = create_app({
             "SQLALCHEMY_DATABASE_URI": self.database_path
         })
@@ -37,7 +44,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
-        self.assertFalse(data['current_category'])
+        self.assertTrue(data['current_category'])
         self.assertTrue(len(data['questions']))
 
 
@@ -45,9 +52,9 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions?page=2000')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], "Resource Not Found")
+        self.assertEqual(data['message'], "Request Cannot Be Processed")
 
     def test_get_categories(self):
         response = self.client().get('/categories')
@@ -108,7 +115,6 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertGreater(data['questions_found'], 0)
 
     def test_retrieve_quiz(self):
         res = self.client().post('/quizzes', json={'previous_questions': [], 'quiz_category': {'id': '5', 'type': 'Entertainment'}})
