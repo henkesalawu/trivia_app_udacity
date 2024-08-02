@@ -70,8 +70,8 @@ def create_app(test_config=None):
             categories = Category.query.all()
             current_category = {
                 category.id: category.type for category in categories}
-
             questions_list = paginate_questions(request, questions)
+
             if len(questions_list) == 0:
                 abort(404)
 
@@ -84,6 +84,7 @@ def create_app(test_config=None):
                 "categories": categories,
                 "current_category": current_category,
             }), 200
+        
         except Exception as e:
             print(e)
             abort(422)
@@ -93,17 +94,21 @@ def create_app(test_config=None):
     def delete_question(question_id):
         try:
             question_to_delete = Question.query.get(question_id)
+
             if question_to_delete is None:
                 abort(404)
+
             deleted_question = question_to_delete
             question_to_delete.delete()
-            selection = Question.query.order_by(Question.id).all()
+            questions = Question.query.order_by(Question.id).all()
+
             return jsonify({
                 "success": True,
                 "deleted_id": question_id,
                 "deleted_question": deleted_question.format(),
-                "total_questions": len(selection),
+                "total_questions": len(questions),
             })
+        
         except Exception as e:
             print(e)
             abort(422)

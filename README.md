@@ -142,7 +142,7 @@ Example: curl http://127.0.0.1:5000/questions?page=2
 - Request Arguments: id - integer
 - Returns: An object with questions for the specified category, total questions, and current category string
 
-Example: curl http://localhost:5000/categories/1/questions
+Example: `curl http://localhost:5000/categories/1/questions`
 ```bash
 {
     'categories': [ 
@@ -176,7 +176,7 @@ Example: curl http://localhost:5000/categories/1/questions
 -Request Arguments: id - integer
 -Returns JSON object with deleted question and number of total questions remaining
 
-Example: curl -X DELETE http://localhost:5000/questions/2
+Example: `curl -X DELETE http://localhost:5000/questions/2`
 ```bash
 {
     'deleted_question': {
