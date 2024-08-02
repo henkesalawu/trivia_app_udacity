@@ -90,7 +90,7 @@ Open (opens in a new tab)http://localhost:3000(opens in a new tab) to view it in
 - Request Arguments: None
 - Returns list of categories
 
-Example: curl http://localhost:5000/categories
+Example: `curl http://localhost:5000/categories`
 ```bash
 {
     'categories': { 
@@ -110,7 +110,7 @@ Example: curl http://localhost:5000/categories
 - Request Arguments: page - integer
 - Returns: An object with 10 paginated questions, total questions, object including all categories, and current category string
 
-Example: curl http://127.0.0.1:5000/questions?page=2
+Example: `curl http://127.0.0.1:5000/questions?page=2`
 ```bash
 {
     'categories': [ 
@@ -195,7 +195,7 @@ Example: `curl -X DELETE http://localhost:5000/questions/2`
 - Sends a post request in order to get question based on category or a random selection depending on what user chooses.
 - Returns random question
 
-Example: curl http://localhost:5000/quizzes -X POST -H "Content-Type: application/json" -d "{\"previous_questions\":[], \"quiz_category\":{\"type\":\"Art\",\"id\":2}}"
+Example: `curl http://localhost:5000/quizzes -X POST -H "Content-Type: application/json" -d "{\"previous_questions\":[], \"quiz_category\":{\"type\":\"Art\",\"id\":2}}"`
 ```bash
 {
   "question": {
@@ -214,7 +214,7 @@ Example: curl http://localhost:5000/quizzes -X POST -H "Content-Type: applicatio
 - Fileds required: question, answer, difficulty and category
 - Return success if question added successfully and returns the question added and total number of questions
 
-Example: curl http://localhost:5000/questions -X POST -H "Content-Type: application/json" -d "{\"question\":\"What is the capital of France?\", \"answer\":\"Paris\", \"category\":\"4\", \"difficulty\":\"2\"}"
+Example: `curl http://localhost:5000/questions -X POST -H "Content-Type: application/json" -d "{\"question\":\"What is the capital of France?\", \"answer\":\"Paris\", \"category\":\"4\", \"difficulty\":\"2\"}"`
 ```bash
 {
     'created': 24,
@@ -234,7 +234,7 @@ Example: curl http://localhost:5000/questions -X POST -H "Content-Type: applicat
 - Sends a post request in order to search for a specific question by search term
 - Returns: any array of questions, a number of totalQuestions that met the search term and the current category string
 
-Example: curl http://localhost:5000/questions/search -X POST -H "Content-Type: application/json" -d "{\"searchTerm\":\"One\"}"
+Example: `curl http://localhost:5000/questions/search -X POST -H "Content-Type: application/json" -d "{\"searchTerm\":\"One\"}"`
 ```bash
 {
     'questions': [

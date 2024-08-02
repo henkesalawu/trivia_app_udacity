@@ -10,7 +10,7 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 def create_app(test_config=None):
-    # create and configure the app
+    # Create and configure the app
     app = Flask(__name__)
 
     if test_config is None:
@@ -33,7 +33,7 @@ def create_app(test_config=None):
             "*")
         return response
 
-    # Handle GET request for all available categories.
+    # GET request for all available categories.
     @app.route("/categories", methods=['GET'])
     def get_categories():
         try:
@@ -62,7 +62,7 @@ def create_app(test_config=None):
 
         return current_questions
     
-    # Handle GET requests for questions
+    # GET requests for questions
     @app.route("/questions", methods=['GET'])
     def get_questions():
         try:
@@ -89,7 +89,7 @@ def create_app(test_config=None):
             print(e)
             abort(422)
 
-    # Endpoint to DELETE question using a question ID.
+    # DELETE question using a question ID.
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
@@ -113,20 +113,22 @@ def create_app(test_config=None):
             print(e)
             abort(422)
 
-    # Endpoint to POST a new question,require the question,
-    # answer text, category, and difficulty score.
+    # POST a new question
+    # require: question, answer, category, difficulty score
     @app.route('/questions', methods=['POST'])
-    def create_question():
+    def add_question():
         body = request.get_json()
-        new_question = body.get('question', None)
-        new_answer = body.get('answer', None)
-        new_category = body.get('category', None)
-        new_difficulty = body.get('difficulty', None)
+        new_question = body.get('question')
+        new_answer = body.get('answer')
+        new_category = body.get('category')
+        new_difficulty = body.get('difficulty')
 
         try:
             if not new_question:
                 abort(422)
             elif not new_answer:
+                abort(422)
+            elif not new_difficulty:
                 abort(422)
             else:
                 question = Question(
@@ -136,12 +138,13 @@ def create_app(test_config=None):
                     difficulty=new_difficulty
                     )
                 question.insert()
+                questions = Question.query.all()
 
                 return jsonify({
                     "success": True,
                     "created": question.id,
                     "created_question": question.format(),
-                    "total_questions": len(Question.query.all()),
+                    "total_questions": len(questions),
                     })
         except Exception as e:
             print(e)
