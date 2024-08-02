@@ -146,12 +146,12 @@ Example: `curl http://localhost:5000/categories/1/questions`
 ```bash
 {
     'categories': [ 
-        "Science",
-        "Art",
-        "Geography",
-        "History",
-        "Entertainment",
-        "Sports" 
+        "1":"Science",
+        "2":"Art",
+        "3":"Geography",
+        "4":"History",
+        "5":"Entertainment",
+        "6":"Sports" 
     ],
     'current_category': {
     'id': 1,

@@ -64,8 +64,9 @@ class QuestionView extends Component {
   }
 
   getByCategory = (id) => {
+    let cat_id = +id + 1;
     $.ajax({
-      url: `/categories/${id}/questions`, //TODO: update request URL
+      url: `/categories/${cat_id}/questions`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
         this.setState({
@@ -162,7 +163,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]}
+              category={this.state.categories[(q.category - 1)]}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />

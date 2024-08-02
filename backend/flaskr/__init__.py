@@ -176,33 +176,36 @@ def create_app(test_config=None):
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def get_questions_by_category(category_id):
         try:
-            category_id = category_id + 1
-            category = Category.query.filter(
-                Category.id == category_id).first()
-            selection = Question.query.order_by(Question.id).filter(
-                Question.category == category_id).all()
-            current_questions = paginate_questions(request, selection)
-
-            if len(current_questions) == 0:
+            category = Category.query.get(category_id)
+            
+            if category is None:
                 abort(404)
 
+            questions = Question.query.filter(Question.category == (category_id)).all()
+
+            if len(questions) == 0:
+                abort(404)
+
+            current_questions = paginate_questions(request, questions)
+            categories = Category.query.all()
+            categories = {
+                category.id: category.type for category in categories}
+            
             return jsonify({
                 "success": True,
                 "questions": current_questions,
-                "total_questions": len(Question.query.all()),
-                "categories": [
-                    category.type for category in Category.query.all()
-                    ],
+                "total_questions": len(questions),
+                "categories": categories,
                 "current_category":  category.format(),
                 })
         except Exception as e:
             print(e)
             abort(404)
 
-    # Endpoint to get questions to play the quiz.
-    # Take category and previous question parameters and
-    # return a random questions within the given category,
-    # if provided, and that is not one of the previous questions.
+    # Get questions to play the quiz.
+    # Takes category and previous question parameters
+    # Returns a random questions within the given category
+    # Don't return one of the previous questions
 
     @app.route('/quizzes', methods=['POST'])
     def get_quizzes():
@@ -210,22 +213,28 @@ def create_app(test_config=None):
             body = request.get_json()
             previous_questions = body.get('previous_questions')
             quiz_category = body.get('quiz_category')
+            quiz_cat_id = quiz_category['id']
 
             if quiz_category is None and previous_questions is None:
                 abort(400)
 
-            if quiz_category['id'] == 0:
-                questions = Question.query.filter(
-                    Question.id.notin_((previous_questions))).all()
+            if quiz_cat_id == 0:
+
+                if len(previous_questions) == 0:
+                    questions = Question.query.all()
+                else:
+                    questions = Question.query.filter(
+                        Question.id.notin_(previous_questions)).all()
             else:
-                questions = Question.query.filter_by(
-                    category=quiz_category['id']).filter(
-                        Question.id.notin_(
-                            (previous_questions))).all()
+                questions = Question.query.filter(
+                    Question.category == quiz_cat_id, 
+                    Question.id.notin_(previous_questions)).all()
+
             if len(questions) is None:
                 question = None
             else:
                 question = random.choice(questions)
+
                 return jsonify({
                     'success': True,
                     'question': question.format(),
@@ -235,7 +244,15 @@ def create_app(test_config=None):
             print(e)
             abort(422)
 
-    # Error handlers for all expected errors
+    # Error handlers
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "Bad Request"
+        }), 400
+    
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
@@ -252,14 +269,6 @@ def create_app(test_config=None):
             "message": "Request Cannot Be Processed"
         }), 422
 
-    @app.errorhandler(400)
-    def bad_request(error):
-        return jsonify({
-            "success": False,
-            "error": 400,
-            "message": "Bad Request"
-        }), 400
-
     @app.errorhandler(500)
     def server_error(error):
         return jsonify({
@@ -269,7 +278,7 @@ def create_app(test_config=None):
         }), 500
 
     @app.errorhandler(405)
-    def not_allowes(error):
+    def not_allowed(error):
         return jsonify({
             "success": False,
             "error": 405,
