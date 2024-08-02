@@ -6,19 +6,8 @@ import random
 
 from models import setup_db, Question, Category
 
+#Variable initialization
 QUESTIONS_PER_PAGE = 10
-
-
-def paginate_questions(request, selection):
-    page = request.args.get('page', 1, type=int)
-    start = (page - 1) * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-
-    questions = [question.format() for question in selection]
-    current_questions = questions[start:end]
-
-    return current_questions
-
 
 def create_app(test_config=None):
     # create and configure the app
@@ -44,7 +33,7 @@ def create_app(test_config=None):
             "*")
         return response
 
-    # Endpoint to handle GET requests for all available categories.
+    # Handle GET request for all available categories.
     @app.route("/categories", methods=['GET'])
     def get_categories():
         try:
@@ -52,34 +41,47 @@ def create_app(test_config=None):
             if len(categories) == 0:
                 abort(400)
 
+            categories = {category.id: category.type for category in categories}
+            
             return jsonify({
                 "success": True,
-                "categories": {
-                    category.id: category.type for category in categories}
+                "categories": categories
             })
         except Exception as e:
             print(e)
             abort(422)
 
-    # Endpoint to handle GET requests for questions,
-    # including pagination (every 10 questions).
+    # Pagination
+    def paginate_questions(request, selection):
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+
+        questions = [question.format() for question in selection]
+        current_questions = questions[start:end]
+
+        return current_questions
+    
+    # Handle GET requests for questions
     @app.route("/questions", methods=['GET'])
     def get_questions():
         try:
-            selection = Question.query.all()
+            questions = Question.query.all()
             categories = Category.query.all()
             current_category = {
                 category.id: category.type for category in categories}
 
-            questions_list = paginate_questions(request, selection)
+            questions_list = paginate_questions(request, questions)
             if len(questions_list) == 0:
                 abort(404)
+
+            categories = [category.type for category in categories]
 
             return jsonify({
                 "success": True,
                 "questions": questions_list,
-                "total_questions": len(selection),
-                "categories": [category.type for category in categories],
+                "total_questions": len(questions),
+                "categories": categories,
                 "current_category": current_category,
             }), 200
         except Exception as e:

@@ -111,6 +111,7 @@ Example: curl http://localhost:5000/categories
 - Returns: An object with 10 paginated questions, total questions, object including all categories, and current category string
 
 Example: curl http://127.0.0.1:5000/questions?page=2
+```bash
 {
     'categories': [ 
         "Science",
@@ -133,6 +134,7 @@ Example: curl http://127.0.0.1:5000/questions?page=2
     'success': true,
     'totalQuestions': 100   
 }
+```
 
 ### GET '/categories/${id}/questions'
 
